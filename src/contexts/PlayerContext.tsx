@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { PlayerState, PlayerAction, Track, RepeatMode } from "../types/music";
+import type { PlayerState, PlayerAction } from "../types/music";
 import { sampleTracks } from "../data/sampleTracks";
 import {
   AudioCommandInvoker,
@@ -14,7 +14,8 @@ import {
   SetVolumeCommand,
   SeekCommand,
 } from "../patterns/commands";
-import { Subject, Observer } from "../patterns/observer";
+import { Subject } from "../patterns/observer";
+import type { Observer } from "../patterns/observer";
 
 const initialState: PlayerState = {
   tracks: sampleTracks,
@@ -31,7 +32,7 @@ const PlayerContext = createContext<
   | {
       state: PlayerState;
       dispatch: React.Dispatch<PlayerAction>;
-      audioRef: React.RefObject<HTMLAudioElement>;
+      audioRef: React.RefObject<HTMLAudioElement | null>;
       commandInvoker: AudioCommandInvoker;
     }
   | undefined
@@ -117,4 +118,97 @@ const playerStateLogger: Observer = {
       volume: state.volume,
     });
   },
+};
+
+export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [state, dispatch] = useReducer(playerReducer, initialState);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const commandInvoker = useRef(new AudioCommandInvoker());
+
+  //Add logger observer
+  useEffect(() => {
+    playerStateSubject.addObserver(playerStateLogger);
+    return () => playerStateSubject.removeObserver(playerStateLogger);
+  }, []);
+
+  // Handle play/pause status using Command Pattern
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    if (state.isPlaying) {
+      const playCommand = new PlayCommand(audioRef.current);
+      commandInvoker.current.execute(playCommand);
+    } else {
+      const pauseCommand = new PauseCommand(audioRef.current);
+      commandInvoker.current.execute(pauseCommand);
+    }
+  }, [state.isPlaying, state.currentTrackIndex]);
+
+  // Handle volume changes using Command Pattern
+  useEffect(() => {
+    if (!audioRef.current) return;
+    const volume = state.isMuted ? 0 : state.volume;
+    const volumeCommand = new SetVolumeCommand(audioRef.current, volume);
+    commandInvoker.current.execute(volumeCommand);
+  }, [state.volume, state.isMuted]);
+
+  // Handle progress updates
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    const audio = audioRef.current;
+
+    const updateProgress = () => {
+      if (audio.duration) {
+        dispatch({ type: "SET_PROGRESS", payload: audio.currentTime });
+      }
+    };
+
+    const handleEnded = () => {
+      if (state.repeatMode === "one") {
+        const seekCommand = new SeekCommand(audio, 0);
+        commandInvoker.current.execute(seekCommand);
+        const playCommand = new PlayCommand(audio);
+        commandInvoker.current.execute(playCommand);
+      } else {
+        dispatch({ type: "NEXT_TRACK" });
+      }
+    };
+
+    audio.addEventListener("timeupdate", updateProgress);
+    audio.addEventListener("ended", handleEnded);
+
+    return () => {
+      audio.removeEventListener("timeupdate", updateProgress);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [state.repeatMode]);
+
+  return (
+    <PlayerContext.Provider
+      value={{
+        state,
+        dispatch,
+        audioRef,
+        commandInvoker: commandInvoker.current,
+      }}
+    >
+      {children}
+      <audio
+        ref={audioRef}
+        src={state.tracks[state.currentTrackIndex]?.audioUrl}
+        preload="metadata"
+      />
+    </PlayerContext.Provider>
+  );
+};
+
+export const usePlayer = () => {
+  const context = useContext(PlayerContext);
+  if (context === undefined) {
+    throw new Error("userPlayer must be used within a PlayerProvider");
+  }
+  return context;
 };
