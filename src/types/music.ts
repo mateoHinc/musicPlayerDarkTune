@@ -16,7 +16,7 @@ export interface PlayerState {
   isPlaying: boolean;
   progress: number;
   volume: number;
-  inMuted: boolean;
+  isMuted: boolean;
   repeatMode: RepeatMode;
   isShuffled: boolean;
 }
