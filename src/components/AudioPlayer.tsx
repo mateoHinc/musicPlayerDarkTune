@@ -1,3 +1,4 @@
+import TrackInfo from "./TrackInfo";
 import TrackList from "./TrackList";
 
 const AudioPlayer: React.FC = () => {
@@ -7,7 +8,9 @@ const AudioPlayer: React.FC = () => {
         <TrackList />
       </div>
 
-      <div className="bg-black bg-opacity-40 backdrop-blur-md border-gray-800 border-t"></div>
+      <div className="bg-black bg-opacity-40 backdrop-blur-md border-gray-800 border-t">
+        <TrackInfo />
+      </div>
     </div>
   );
 };
