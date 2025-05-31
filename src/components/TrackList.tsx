@@ -28,7 +28,7 @@ const TrackList: React.FC = () => {
           <tr>
             <th className="px-4 py-2 w-10">#</th>
             <th className="px-4 py-2">Title</th>
-            <th className="hidden mg:table-cell px-4 py-2">Artist</th>
+            <th className="hidden md:table-cell px-4 py-2">Artist</th>
             <th className="hidden lg:table-cell px-4 py-2">Album</th>
             <th className="px-4 py-2 text-right">
               <Clock size={14} />
@@ -46,7 +46,7 @@ const TrackList: React.FC = () => {
             >
               <td className="relative px-4 py-3 w-10">
                 {index === currentTrackIndex && isPlaying ? (
-                  <div className="absolute inset-0 flex items-center justity-center">
+                  <div className="absolute inset-0 flex justify-center items-center">
                     <div className="flex space-x-[2px]">
                       <div className="bg-blue-400 w-[2px] h-3 animate-sound-wave"></div>
                       <div className="bg-blue-400 w-[2px] h-4 animate-sound-wave animation-delay-200"></div>

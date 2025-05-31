@@ -1,3 +1,4 @@
+import ProgressBar from "./ProgressBar";
 import TrackInfo from "./TrackInfo";
 import TrackList from "./TrackList";
 
@@ -10,6 +11,9 @@ const AudioPlayer: React.FC = () => {
 
       <div className="bg-black bg-opacity-40 backdrop-blur-md border-gray-800 border-t">
         <TrackInfo />
+        <div className="px-4 pb-2">
+          <ProgressBar />
+        </div>
       </div>
     </div>
   );
