@@ -1,3 +1,4 @@
+import PlayerControls from "./PlayerControls";
 import ProgressBar from "./ProgressBar";
 import TrackInfo from "./TrackInfo";
 import TrackList from "./TrackList";
@@ -13,6 +14,10 @@ const AudioPlayer: React.FC = () => {
         <TrackInfo />
         <div className="px-4 pb-2">
           <ProgressBar />
+        </div>
+        <div className="flex items-center px-4 pb-4 justify between">
+          <div className="hidden sm:block w-28"></div>
+          <PlayerControls />
         </div>
       </div>
     </div>
