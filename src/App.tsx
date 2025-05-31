@@ -2,7 +2,6 @@
 import AudioPlayer from "./components/AudioPlayer";
 import { PlayerProvider } from "./contexts/PlayerContext";
 import { Music } from "lucide-react";
-import "./App.css";
 
 function App() {
   return (
